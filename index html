@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Frozen Tales | Professional POS & CRM</title>
+    
+    <!-- Scripts & Styles -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            background-color: #f8fafc;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .ios-blur {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        // --- Menu Configuration ---
+        const MENU_DATA = [
+            {
+                category: "Classic Golas",
+                items: [
+                    { id: 'pg-orange', name: 'Pocket Gola - Orange Pop', price: 30, desc: 'Small shaved ice + orange syrup' },
+                    { id: 'pg-khus', name: 'Pocket Gola - Khus Cool', price: 30, desc: 'Small shaved ice + khus syrup' },
+                    { id: 'pg-choc', name: 'Pocket Gola - Chocolate Chill', price: 30, desc: 'Small shaved ice + chocolate syrup' },
+                    { id: 'pg-rose', name: 'Pocket Gola - Rose Sweet', price: 30, desc: 'Small shaved ice + rose syrup' },
+                    { id: 'pg-chiku', name: 'Pocket Gola - Chiku Treat', price: 30, desc: 'Small shaved ice + chiku flavour' },
+                    { id: 'pg-rimzim', name: 'Pocket Gola - RimZim Magic', price: 30, desc: 'Small shaved ice + rimzim flavour' },
+                    { id: 'pg-mango', name: 'Pocket Gola - Raw Mango', price: 30, desc: 'Small shaved ice + kachi kairi' },
+                    { id: 'pg-jamun', name: 'Pocket Gola - Jamun Joy', price: 30, desc: 'Small shaved ice + jamun syrup' },
+                    { id: 'pg-lemon', name: 'Pocket Gola - Lemon Fresh', price: 30, desc: 'Small shaved ice + lemon syrup' },
+                    { id: 'pg-pine', name: 'Pocket Gola - Pineapple Punch', price: 30, desc: 'Small shaved ice + pineapple' },
+                    { id: 'pg-kothu', name: 'Pocket Gola - Kothu Twist', price: 30, desc: 'Small shaved ice + kothu flavour' },
+                    { id: 'bg-all', name: 'Big Gola (Any Flavor)', price: 50, desc: 'Large shaved ice + extra syrup' },
+                ]
+            },
+            {
+                category: "Special Golas",
+                items: [
+                    { id: 'sg-cadbury', name: 'Cadbury Gola', price: 80, desc: 'Shaved ice + Cadbury chocolate' },
+                    { id: 'sg-butter', name: 'Butterscotch Gola', price: 80, desc: 'Shaved ice + butterscotch' },
+                    { id: 'sg-imli', name: 'Thai Imli Gola', price: 80, desc: 'Shaved ice + tamarind + masala' },
+                    { id: 'sg-blue', name: 'Blueberry Gola', price: 80, desc: 'Shaved ice + blueberry' },
+                    { id: 'sg-falsa', name: 'Falsa Gola', price: 80, desc: 'Shaved ice + falsa syrup' },
+                    { id: 'sg-guava', name: 'Guava Chilli', price: 80, desc: 'Shaved ice + guava + chilli' },
+                    { id: 'sg-kairi', name: 'Kairi Chilli', price: 80, desc: 'Shaved ice + raw mango + chilli' },
+                    { id: 'sg-rabdi', name: 'Rabdi Gola', price: 80, desc: 'Shaved ice + flavour syrup + rabdi' },
+                ]
+            },
+            {
+                category: "Ice Bowls",
+                items: [
+                    { id: 'ib-classic', name: 'Classic Ice Bowl', price: 70, desc: 'Shaved ice + flavour syrup' },
+                    { id: 'ib-cream', name: 'Cream Ice Bowl', price: 80, desc: 'Shaved ice + syrup + sweet cream' },
+                ]
+            },
+            {
+                category: "Loaded Ice Bowls",
+                items: [
+                    { id: 'lib-malai', name: 'Malai Cream Bowl', price: 150, desc: 'Ice + syrup + malai + cream + scoop' },
+                    { id: 'lib-dry', name: 'Dry Fruit Bowl', price: 180, desc: 'Ice + syrup + dry fruits + scoop' },
+                    { id: 'lib-mango', name: 'Mango Special Bowl', price: 230, desc: 'Ice + syrup + fresh mango + cream' },
+                    { id: 'lib-cadbury', name: 'Cadbury Chocolate Blast', price: 250, desc: 'Ice + choc syrup + cadbury + chips' },
+                    { id: 'lib-nutella', name: 'Nutella Biscoff Bowl', price: 260, desc: 'Ice + syrup + Nutella + Biscoff' },
+                ]
+            },
+            {
+                category: "Big Specials",
+                items: [
+                    { id: 'bs-jumbo', name: 'Jumbo Ice Bowl', price: 300, desc: 'Extra large loaded ice dish' },
+                    { id: 'bs-bahubali', name: 'Bahubali Watermelon Bowl', price: 400, desc: 'Watermelon + fruits + loaded toppings' },
+                ]
+            }
+        ];
+
+        // --- Icon Component ---
+        const Icon = ({ name, size = 20, className = "" }) => {
+            useEffect(() => {
+                if (window.lucide) window.lucide.createIcons();
+            }, [name]);
+            return <i data-lucide={name} style={{ width: size, height: size }} className={className}></i>;
+        };
+
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('billing');
+            const [customer, setCustomer] = useState({ name: '', mobile: '', address: '', count: 1 });
+            const [cart, setCart] = useState({});
+            const [search, setSearch] = useState('');
+            const [orders, setOrders] = useState([]);
+            const [exportDate, setExportDate] = useState(new Date().toISOString().split('T')[0]);
+            const [toast, setToast] = useState(null);
+
+            useEffect(() => {
+                const saved = localStorage.getItem('frozen_tales_v2');
+                if (saved) setOrders(JSON.parse(saved));
+            }, []);
+
+            const updateOrders = (newList) => {
+                setOrders(newList);
+                localStorage.setItem('frozen_tales_v2', JSON.stringify(newList));
+            };
+
+            const total = useMemo(() => {
+                return Object.entries(cart).reduce((acc, [id, qty]) => {
+                    const item = MENU_DATA.flatMap(c => c.items).find(i => i.id === id);
+                    return acc + (item ? item.price * qty : 0);
+                }, 0);
+            }, [cart]);
+
+            const updateQty = (id, delta) => {
+                setCart(prev => {
+                    const newQty = (prev[id] || 0) + delta;
+                    if (newQty <= 0) {
+                        const { [id]: _, ...rest } = prev;
+                        return rest;
+                    }
+                    return { ...prev, [id]: newQty };
+                });
+            };
+
+            const showNotify = (msg) => {
+                setToast(msg);
+                setTimeout(() => setToast(null), 3000);
+            };
+
+            const handleFinalize = () => {
+                if (!customer.name || !customer.mobile) return showNotify("Fill Name & Mobile!");
+                if (total === 0) return showNotify("Cart is empty!");
+
+                const order = {
+                    id: Date.now(),
+                    ...customer,
+                    total,
+                    date: new Date().toISOString(),
+                    items: Object.entries(cart).map(([id, qty]) => {
+                        const itm = MENU_DATA.flatMap(c => c.items).find(i => i.id === id);
+                        return `${itm.name} (x${qty})`;
+                    }).join(', ')
+                };
+
+                updateOrders([order, ...orders]);
+                triggerWhatsApp(customer.name, customer.mobile, total);
+                
+                setCart({});
+                setCustomer({ name: '', mobile: '', address: '', count: 1 });
+                showNotify("Success! Bill Sent.");
+            };
+
+            const triggerWhatsApp = (name, mobile, amt) => {
+                const msg = `Hi ${name} 👋  
+
+Thank you for shopping with Frozen Tales! 🍧  
+Your bill amount is ₹${amt}.
+
+As a part of your purchase, you get an exclusive discount from our sponsor a premium clothing brand. 👕  
+Use it here: www.theSorenStudio.in
+Code: *FrozenFree*
+
+Also, for any health or home-care requirements, XzeCure will be taking care of you.  
+As a Frozen Tales customer, you are now a priority customer at www.XzeCure.com
+
+We hope to see you again soon for another frozen story! ❄️✨`;
+                const cleanNum = mobile.replace(/\D/g, '');
+                const finalNum = cleanNum.length === 10 ? '91' + cleanNum : cleanNum;
+                window.open(`https://wa.me/${finalNum}?text=${encodeURIComponent(msg)}`, '_blank');
+            };
+
+            const exportData = () => {
+                const dayOrders = orders.filter(o => o.date.startsWith(exportDate));
+                if (dayOrders.length === 0) return showNotify("No sales on this date.");
+
+                const csv = [
+                    ["Time", "Customer", "Mobile", "Address", "Table", "Amount", "Details"].join(","),
+                    ...dayOrders.map(o => [
+                        new Date(o.date).toLocaleTimeString(),
+                        o.name, o.mobile, o.address, o.count, o.total, `"${o.items}"`
+                    ].join(","))
+                ].join("\n");
+
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `FrozenTales_${exportDate}.csv`;
+                a.click();
+            };
+
+            const filteredMenu = MENU_DATA.map(c => ({
+                ...c,
+                items: c.items.filter(i => i.name.toLowerCase().includes(search.toLowerCase()))
+            })).filter(c => c.items.length > 0);
+
+            return (
+                <div className="min-h-screen max-w-md mx-auto bg-slate-50 relative pb-32">
+                    {/* Header */}
+                    <div className="bg-white border-b px-6 py-4 sticky top-0 z-50 flex justify-between items-center shadow-sm">
+                        <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                                <Icon name="snowflake" className="text-white" size={18} />
+                            </div>
+                            <h1 className="font-extrabold text-slate-800 tracking-tight">FROZEN TALES</h1>
+                        </div>
+                        <div className="flex bg-slate-100 p-1 rounded-lg text-xs font-bold">
+                            <button onClick={()=>setActiveTab('billing')} className={`px-3 py-1.5 rounded-md ${activeTab==='billing'?'bg-white shadow-sm text-blue-600':'text-slate-500'}`}>Billing</button>
+                            <button onClick={()=>setActiveTab('history')} className={`px-3 py-1.5 rounded-md ${activeTab==='history'?'bg-white shadow-sm text-blue-600':'text-slate-500'}`}>Records</button>
+                        </div>
+                    </div>
+
+                    {toast && (
+                        <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-3 rounded-full text-sm font-bold shadow-xl z-[60] animate-bounce">
+                            {toast}
+                        </div>
+                    )}
+
+                    <div className="p-4 space-y-6">
+                        {activeTab === 'billing' ? (
+                            <>
+                                {/* Stats */}
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="bg-blue-600 p-4 rounded-3xl text-white shadow-lg shadow-blue-100">
+                                        <p className="text-[10px] font-bold uppercase opacity-70">Today's Sales</p>
+                                        <p className="text-2xl font-black">₹{orders.filter(o => o.date.startsWith(new Date().toISOString().split('T')[0])).reduce((a,b)=>a+b.total,0)}</p>
+                                    </div>
+                                    <div className="bg-white border p-4 rounded-3xl shadow-sm text-center">
+                                        <p className="text-[10px] font-bold uppercase text-slate-400">Current Bill</p>
+                                        <p className="text-2xl font-black text-blue-600">₹{total}</p>
+                                    </div>
+                                </div>
+
+                                {/* Inputs */}
+                                <div className="bg-white p-5 rounded-3xl border border-slate-200 space-y-3">
+                                    <div className="relative">
+                                        <Icon name="user" size={16} className="absolute left-3 top-3.5 text-slate-300" />
+                                        <input type="text" placeholder="Customer Name" className="w-full pl-10 pr-4 py-3 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-100 transition-all text-sm border-none" value={customer.name} onChange={e=>setCustomer({...customer, name: e.target.value})} />
+                                    </div>
+                                    <div className="relative">
+                                        <Icon name="phone" size={16} className="absolute left-3 top-3.5 text-slate-300" />
+                                        <input type="tel" inputMode="numeric" placeholder="Mobile Number" className="w-full pl-10 pr-4 py-3 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-100 transition-all text-sm border-none font-mono" value={customer.mobile} onChange={e=>setCustomer({...customer, mobile: e.target.value.replace(/\D/g,'')})} />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div className="relative">
+                                            <Icon name="map-pin" size={16} className="absolute left-3 top-3.5 text-slate-300" />
+                                            <input type="text" placeholder="Table/Area" className="w-full pl-10 pr-4 py-3 bg-slate-50 rounded-xl outline-none text-sm border-none" value={customer.address} onChange={e=>setCustomer({...customer, address: e.target.value})} />
+                                        </div>
+                                        <div className="relative">
+                                            <Icon name="users" size={16} className="absolute left-3 top-3.5 text-slate-300" />
+                                            <input type="number" placeholder="Count" className="w-full pl-10 pr-4 py-3 bg-slate-50 rounded-xl outline-none text-sm border-none" value={customer.count} onChange={e=>setCustomer({...customer, count: parseInt(e.target.value)||1})} />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Menu */}
+                                <div className="space-y-4">
+                                    <div className="sticky top-20 z-10 bg-slate-50/80 backdrop-blur-md py-2">
+                                        <div className="relative">
+                                            <Icon name="search" size={18} className="absolute left-4 top-3.5 text-slate-300" />
+                                            <input type="text" placeholder="Search menu..." className="w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-blue-100 transition-all" value={search} onChange={e=>setSearch(e.target.value)} />
+                                        </div>
+                                    </div>
+
+                                    {filteredMenu.map((cat, i) => (
+                                        <div key={i} className="space-y-3">
+                                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">{cat.category}</h3>
+                                            <div className="space-y-2">
+                                                {cat.items.map(item => {
+                                                    const q = cart[item.id] || 0;
+                                                    return (
+                                                        <div key={item.id} className={`p-4 bg-white rounded-2xl border transition-all flex items-center justify-between ${q>0?'border-blue-500 ring-4 ring-blue-50':'border-slate-100 shadow-sm'}`}>
+                                                            <div className="flex-1">
+                                                                <p className="font-bold text-slate-800 text-sm leading-tight">{item.name}</p>
+                                                                <p className="text-blue-600 font-black text-sm mt-1">₹{item.price}</p>
+                                                            </div>
+                                                            <div className={`flex items-center gap-2 p-1 rounded-xl ${q>0?'bg-blue-600 text-white':'bg-slate-50'}`}>
+                                                                <button onClick={()=>updateQty(item.id,-1)} className="p-1" disabled={q===0}><Icon name="minus" size={16}/></button>
+                                                                <span className="w-5 text-center font-bold text-sm">{q}</span>
+                                                                <button onClick={()=>updateQty(item.id,1)} className="p-1"><Icon name="plus" size={16}/></button>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        ) : (
+                            /* History Tab */
+                            <div className="space-y-4">
+                                <div className="bg-white p-5 rounded-3xl border border-slate-200 flex flex-col gap-3">
+                                    <p className="text-xs font-bold text-slate-400 uppercase">Export Daily Report</p>
+                                    <div className="flex gap-2">
+                                        <input type="date" className="flex-1 bg-slate-50 p-3 rounded-xl border-none outline-none font-bold text-slate-700 text-sm" value={exportDate} onChange={e=>setExportDate(e.target.value)} />
+                                        <button onClick={exportData} className="bg-emerald-600 text-white px-4 rounded-xl font-bold flex items-center gap-2"><Icon name="download" size={16}/> CSV</button>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                    {orders.length === 0 ? (
+                                        <div className="text-center py-20 text-slate-300"><Icon name="history" size={40} className="mx-auto mb-2 opacity-20"/><p>No history</p></div>
+                                    ) : (
+                                        orders.map(o => (
+                                            <div key={o.id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <div>
+                                                        <p className="text-[10px] font-bold text-blue-500 uppercase">{new Date(o.date).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</p>
+                                                        <p className="font-bold text-slate-800">{o.name}</p>
+                                                    </div>
+                                                    <p className="text-lg font-black text-blue-600">₹{o.total}</p>
+                                                </div>
+                                                <p className="text-[10px] text-slate-400 line-clamp-1">{o.items}</p>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Bottom Action Bar */}
+                    {activeTab === 'billing' && (
+                        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 ios-blur border-t z-[100] max-w-md mx-auto">
+                            <div className="flex gap-3">
+                                <button onClick={()=>{if(confirm('Clear cart?'))setCart({})}} className="p-4 bg-slate-100 text-slate-400 rounded-2xl active:bg-red-50 active:text-red-500 transition-colors">
+                                    <Icon name="trash-2" size={24} />
+                                </button>
+                                <button onClick={handleFinalize} disabled={total===0} className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-2xl font-black text-lg transition-all shadow-xl active:scale-95 ${total>0?'bg-blue-600 text-white shadow-blue-200':'bg-slate-200 text-slate-400'}`}>
+                                    <Icon name="send" size={20} />
+                                    Finalize Bill
+                                    {total>0 && <span className="bg-white/20 px-2 py-0.5 rounded-lg text-xs ml-1">₹{total}</span>}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
